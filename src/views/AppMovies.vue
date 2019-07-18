@@ -5,16 +5,22 @@
     <p >
       Selected number of movies {{selected.length}}
     </p>
-    <ul>
-      <li v-if="filteredArray.length == 0">Your search has no results, try again</li>
-      <li v-for="(movie,index) in filteredArray" :key="index">
-          <p v-if="filteredArray.length == 0"> Empty</p>
+    <paginate name="movies" :list="filteredArray" :per="4">
+      <ul v-for="movie in paginated('movies')" :key="movie.id">
           <MoviesRow 
           :movie = "movie"
           @select-movie="selectMovie(index)"
           />
-      </li>
-    </ul>
+      </ul>
+    </paginate>
+    <div>
+      <paginate-links class="btn btn-primary" for="movies" :simple="{
+        prev: 'Back',
+        next: 'Next'
+        }">
+      </paginate-links>
+    </div>
+    
     <div>
       <button @click="selectAll()">
         Select all
@@ -24,16 +30,16 @@
       </button>
     </div>
     <div>
-      <button @click="nameFilterAsc()">
+      <button @click="nameSortAsc()">
         Sort by Name asc
       </button>
-      <button @click="nameFilterDsc()">
+      <button @click="nameSortDsc()">
         Sort by Name desc
       </button>
-      <button>
+      <button @click="durationSortAsc()">
         Sort by Duration asc
       </button>
-      <button>
+      <button @click="durationSortDsc()">
         Sort by Duration desc
       </button>
     </div>
@@ -53,7 +59,8 @@ export default {
     return {
       movies : [],
       term: "",
-      selected : []
+      selected : [],
+      paginate: ["movies"]
     }
   },
 
@@ -100,28 +107,43 @@ export default {
       this.selected.splice(0,this.selected.length)
     },
 
-    nameFilterAsc() {
-      this.filteredArray.sort(function(a,b) {
-        var movieA = a.title.toUpperCase(); 
-        var movieB = b.title.toUpperCase()
-        if (movieA > movieB) {
+   sortByName(a, b) {
+      let titleA = a.title.toUpperCase();
+      let titleB = b.title.toUpperCase();
+      if (titleA > titleB) {
+        return 1;
+      }
+      if (titleA < titleB) {
         return -1;
-        }
-      })
-      console.log(this.filteredArray)
+      }
+      return 0;
     },
 
-    nameFilterDsc() {
-      this.filteredArray.sort(function(a,b) {
-        var movieA = a.title.toUpperCase(); 
-        var movieB = b.title.toUpperCase()
-        if (movieA < movieB) {
+    nameSortAsc() {
+      this.movies.sort(this.sortByName);
+    },
+
+    nameSortDsc() {
+      this.movies.sort(this.sortByName).reverse();
+    },
+
+    sortByDuration(a, b) {
+      if (a.duration > b.duration) {
+        return 1;
+      }
+      if (a.duration < b.duration) {
         return -1;
-        }
-      })
-      console.log(this.filteredArray)
-    }
-  }
+      }
+      return 0;
+      },
+
+      durationSortAsc() {
+        this.movies.sort(this.sortByDuration);
+      },
+      durationSortDsc() {
+      this.movies.sort(this.sortByDuration).reverse();
+      },
+  },
 }
 </script>
 
